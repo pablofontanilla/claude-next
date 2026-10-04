@@ -1,0 +1,11 @@
+{
+  "name": "next",
+  "version": "0.1.0",
+  "description": "Hand off to a fresh session: /next:go writes a handoff note, clears the context, and resumes from the note.",
+  "author": {
+    "name": "Pablo Fontanilla"
+  },
+  "homepage": "https://github.com/pablofontanilla/claude-next",
+  "license": "Apache-2.0",
+  "types": "./types/index.d.ts"
+}
