@@ -40,7 +40,17 @@ The optional text sets the next task.
 - A `SessionStart` hook injects the note into the new session and moves
   it to `<key>.consumed.md`, so it fires only once.
 
-Nothing is written inside your repository.
+Nothing is written inside your repository, except in a `workspace`
+session (below).
+
+## In a workspace
+
+If the launch directory is a `workspace` (it has `dev-env.yaml`), a
+workspace project is loaded, and the `workspace` plugin is installed,
+`/next:go` first updates the project docs with the rules of
+`/workspace:update-project`, in the same turn. The note then lists the
+project's `CLAUDE.md` and the detail files for the next task under
+"Read first". In any other session this step is skipped.
 
 ## Feedback
 
