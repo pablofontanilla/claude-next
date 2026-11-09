@@ -9,7 +9,7 @@
       "name": "next",
       "source": "./plugins/next",
       "description": "Hand off to a fresh session: /next:go writes a handoff note, clears the context, and resumes from the note.",
-      "version": "0.1.0"
+      "version": "0.2.0"
     }
   ]
 }

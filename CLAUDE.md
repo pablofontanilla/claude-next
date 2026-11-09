@@ -38,7 +38,8 @@ Three parts work together. A change to one usually needs a change to
 another.
 
 1. **Skill** `skills/go/SKILL.md`: the model writes the note to the path
-   that `handoff.py path` gives, then runs `handoff.py arm`.
+   that `handoff.py path` gives, then runs `handoff.py arm`. In a
+   workspace session it first updates the project docs inline.
 2. **Mod** `hooks/register.ts` (function hooks, listed under `modules` in
    `hooks/hooks.json`): a `command.run` hook on `next:go` sets the phase
    to `running`. A `tool.call` hook on Bash sets `armed` when the `arm`
@@ -79,9 +80,17 @@ Contracts that break silently if they drift:
   Moving the script logic into the TypeScript mod (to remove `python3`)
   was discussed and not done.
 - **Nothing in the user's repo.** Notes live in `~/.claude/next/`
-  (`HANDOFF_DIR` overrides this). This folder is separate from the
-  edge-tooling plugin's `~/.claude/handoffs/`, so both plugins can be
-  installed. Never write to the repo or edit its CLAUDE.md.
+  (`HANDOFF_DIR` overrides this). Never write to the repo or edit its
+  CLAUDE.md. The one exception is the optional workspace step below.
+- **Workspace step.** `/next:go` replaces the retired
+  `/workspace:handoff`. When `handoff.py path` returns
+  `workspace_detected`, a workspace project is loaded, and
+  `workspace:update-project` is available, the skill updates the project
+  docs inline before it writes the note. It must stay inline (no fork,
+  no nested skill call): the mod cancels the handoff if the turn ends
+  before `arm` succeeds. The step lives in `next:go`, not in a wrapper
+  skill in `workspace`, because it is not known whether `command.run`
+  fires when one skill invokes another.
 - **One note per launch directory, fired once.** The key is the resolved
   launch directory (each git worktree has its own). Any `read` retires
   the note, live or expired, so a second `/clear` cannot fire it again.

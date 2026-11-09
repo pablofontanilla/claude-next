@@ -25,9 +25,24 @@ Run via Bash:
 python3 "${CLAUDE_PLUGIN_ROOT}/scripts/handoff.py" path --project-dir "${CLAUDE_PROJECT_DIR}"
 ```
 
-Parse the JSON. On `status: "error"`, show `message` and stop. Keep `path`.
+Parse the JSON. On `status: "error"`, show `message` and stop. Keep `path`
+and `workspace_detected`.
 
-### Step 2: Capture the Git State
+### Step 2: Update the Workspace Project (Optional)
+
+Do this step only if all three are true:
+
+- `workspace_detected` is true.
+- A workspace project is loaded in this conversation.
+- The `workspace:update-project` skill is available.
+
+Otherwise skip it. If they hold, update the project docs now, in this
+turn, with the rules of `workspace:update-project`. Do the edits inline:
+do not invoke that skill and do not start a fork or a background agent.
+The handoff is cancelled if this turn ends before Step 5 arms the note,
+so the docs update, the note, and the arm must all happen in one turn.
+
+### Step 3: Capture the Git State
 
 Run via Bash:
 
@@ -38,7 +53,7 @@ git branch --show-current; git status --short | head -30; git log --oneline -5; 
 Skip this step outside a git repo. Uncommitted and unpushed work is the
 detail the next session most often gets wrong, so record it exactly.
 
-### Step 3: Compose the Note
+### Step 4: Compose the Note
 
 Write from this conversation, not from re-reading files. If `$ARGUMENTS`
 is not empty, make it the next task unless the conversation clearly
@@ -73,9 +88,11 @@ Use exactly this structure, and keep it under 60 lines:
 
 Omit any section that would be empty, except **Goal**, **State** and
 **Next task**. List under **Read first** only files the next task needs,
-at most five; never CLAUDE.md, which loads by itself.
+at most five; never the repo's CLAUDE.md, which loads by itself. If
+Step 2 ran, list the project's `CLAUDE.md` first, then the detail files
+the next task needs.
 
-### Step 4: Write and Arm
+### Step 5: Write and Arm
 
 Write the note to `path` from Step 1 with the Write tool, then run:
 
@@ -86,7 +103,7 @@ python3 "${CLAUDE_PLUGIN_ROOT}/scripts/handoff.py" arm --project-dir "${CLAUDE_P
 On `status: "error"`, show `message` and stop: the session is not
 cleared. A note over the size limit must be shortened and armed again.
 
-### Step 5: Report
+### Step 6: Report
 
 Tell the user, in one or two lines, that the handoff is armed and the
 session clears and resumes at `<next task>` as soon as this turn ends.
@@ -94,8 +111,9 @@ End the turn there; do not start the next task in this session.
 
 ## Notes
 
-- Writes one file under `~/.claude/next/`. Never writes inside the
-  repository, never edits CLAUDE.md, never commits.
+- Writes one file under `~/.claude/next/`. Never edits the repo's
+  CLAUDE.md and never commits. The only other writes are the workspace
+  project docs in Step 2, and only in a workspace session.
 - Keyed by launch directory: each git worktree gets its own note.
 - After the note fires, or expires (60 minutes by default), it moves to
   `<key>.consumed.md` beside it, so it can still be pasted by hand.
